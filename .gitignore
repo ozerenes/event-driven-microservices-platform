@@ -1,0 +1,80 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.code-workspace
+.project
+.classpath
+.settings/
+bin/
+out/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs & temp
+*.log
+*.tmp
+*.temp
+*.swp
+*~
+.tmp/
+
+# Local / secrets (GitHub'a atılmamalı)
+.env
+.env.local
+.env.*.local
+*.env
+application-local.yml
+application-local.properties
+**/application-local.yml
+**/application-local.properties
+secrets/
+*.pem
+*.key
+
+# Spring Boot
+spring-boot-devtools.properties
+
+# Test / coverage
+*.class
+.gradle/
+coverage/
+*.exec
+*.gcda
+*.gcno
+jacoco.exec
+.hypothesis/
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+!**/src/main/resources/**/*.jar
+!**/src/test/resources/**/*.jar
+
+docs/

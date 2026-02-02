@@ -1,0 +1,114 @@
+# Local dev: run from repo root: docker compose -f docker/docker-compose.yml up -d
+# Requires: Kafka, PostgreSQL (per service). Build images from repo root:
+#   docker compose -f docker/docker-compose.yml build
+
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  order-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+    ports:
+      - "5433:5432"
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+
+  notification-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: notification
+      POSTGRES_PASSWORD: notification
+    ports:
+      - "5434:5432"
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+
+  order-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.order-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: order-db
+      DB_PORT: "5432"
+      DB_USER: order
+      DB_PASSWORD: order
+    depends_on:
+      - kafka
+      - order-db
+
+  payment-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.payment-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: payment-db
+      DB_PORT: "5432"
+      DB_USER: payment
+      DB_PASSWORD: payment
+    depends_on:
+      - kafka
+      - payment-db
+
+  notification-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.notification-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: notification-db
+      DB_PORT: "5432"
+      DB_USER: notification
+      DB_PASSWORD: notification
+    depends_on:
+      - kafka
+      - notification-db
+
+volumes:
+  order-db-data:
+  payment-db-data:
+  notification-db-data:
